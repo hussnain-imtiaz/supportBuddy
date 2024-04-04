@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Buddy 🤗</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #chatBox {
+            width: 80%;
+            max-width: 600px;
+            height: 500px;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .message {
+            padding: 10px;
+            border-radius: 10px;
+            max-width: fit-content;
+        }
+        .user {
+            background-color: #d1e8ff;
+            align-self: flex-end;
+        }
+        .buddy {
+            background-color: #fde4cf;
+            align-self: flex-start;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+        }
+        input {
+            flex-grow: 1;
+            margin-right: 0;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #startNew {
+            background-color: #dc3545;
+        }
+        #startNew:hover {
+            background-color: #c82333;
+        }
+        .input-area {
+            display: flex;
+            width: 80%;
+            max-width: 620px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Support Buddy 🤗</h1>
+    <div id="chatBox"></div>
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Ask me anything..." disabled>
+        <button onclick="sendMessage()">Send</button>
+        <button id="startNew" onclick="startNewChat()">Start New</button>
+    </div>
+    <input type="text" id="userName" placeholder="Enter your name here...">
+
+    <script>
+        const userNameInput = document.getElementById('userName');
+        const userInput = document.getElementById('userInput');
+        const chatBox = document.getElementById('chatBox');
+
+        function appendMessage(text, sender) {
+            const div = document.createElement('div');
+            div.classList.add('message', sender);
+            const content = document.createTextNode(text);
+            div.appendChild(content);
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function displayTypingEffect(message, sender) {
+            const div = document.createElement('div');
+            div.classList.add('message', sender);
+            chatBox.appendChild(div);
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < message.length) {
+                    div.textContent += message[i++];
+                } else {
+                    clearInterval(interval);
+                }
+            }, 30); // Adjust for typing speed
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        userNameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && userNameInput.value.trim() !== '') {
+                userInput.disabled = false;
+                userNameInput.disabled = true;
+                userInput.focus();
+            }
+        });
+
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+            appendMessage(userNameInput.value + ': ' + message, 'user');
+            userInput.value = '';
+            fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayTypingEffect('🤗 ' + data.message, 'buddy');
+            });
+        }
+
+        function startNewChat() {
+            chatBox.innerHTML = '';
+            userInput.disabled = true;
+            userNameInput.disabled = false;
+            userNameInput.value = '';
+            displayTypingEffect("Hi, I am your Mental Health Support Chatbot. Feel free to enter your name and ask your questions.", 'buddy');
+            userNameInput.focus();
+        }
+
+        window.onload = function() {
+            displayTypingEffect("Hi, I am your Mental Health Support Chatbot. Feel free to enter your name and ask your questions.", 'buddy');
+        };
+    </script>
+</body>
+</html>
