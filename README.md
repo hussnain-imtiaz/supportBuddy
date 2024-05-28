@@ -59,6 +59,6 @@ To tailor the chatbot responses or integrate additional features, modify the `co
 ## Acknowledgments
 
 - Google Cloud Vertex AI for the AI model backend.
-- Flask for the web application framework.
+- Flask for the web application framework. 
 
 
